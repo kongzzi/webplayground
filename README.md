@@ -17,11 +17,8 @@
 
 ## 웹사이트 열기
 
-[Live Web Coder 바로가기](https://kongzzi.github.io/kongzzi.livecoder)
+[Live Web Coder 바로가기](https://kongzzi.github.io/kongzzi.livecoder/index.html)
 
 ## 라이선스
 
 MIT License
-
-
-https://kongzzi.github.io/kongzzi.livecoder/
