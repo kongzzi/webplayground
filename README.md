@@ -17,8 +17,11 @@
 
 ## 웹사이트 열기
 
-[Live Web Coder 바로가기](https://orangebean.github.io/LiveWebCoder)
+[Live Web Coder 바로가기](https://kongzzi.github.io/kongzzi.livecoder)
 
 ## 라이선스
 
 MIT License
+
+
+https://kongzzi.github.io/kongzzi.livecoder/
