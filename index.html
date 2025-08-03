@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>콩냥의 웹 프로그래밍 연습장</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism-tomorrow.min.css" rel="stylesheet" />
     <style>
         * {
             margin: 0;
@@ -57,16 +58,93 @@
             flex-direction: column;
         }
 
-        .editor {
+        .editor-container {
             flex: 1;
-            padding: 10px;
+            position: relative;
             border: 1px solid #ccc;
             border-radius: 4px;
-            background-color: #fff;
-            resize: none;
-            font-family: monospace;
+            background-color: #2d2d2d;
+        }
+
+        .editor-container code {
+            margin: 0;
+            padding: 0;
+            background: none !important;
+            display: block;
+            white-space: pre-wrap;
+            word-break: break-all;
+            word-wrap: break-word;
+            font-family: Consolas, Monaco, 'Andale Mono', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            tab-size: 2;
+        }
+
+        .editor {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 10px;
+            color: transparent;
+            caret-color: #fff;
+            background: transparent;
+            resize: none;
+            font-family: Consolas, Monaco, 'Andale Mono', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            tab-size: 2;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            word-break: break-all;
+            overflow: auto;
             box-sizing: border-box;
+            z-index: 2;
+            border: none;
+        }
+
+        .editor-highlight {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 10px;
+            font-family: Consolas, Monaco, 'Andale Mono', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            pointer-events: none;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            word-break: break-all;
+            overflow: hidden;
+            background-color: #2d2d2d;
+            z-index: 1;
+        }
+
+        .editor::selection {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .editor::-webkit-scrollbar, .editor-highlight::-webkit-scrollbar {
+            width: 12px;
+            height: 12px;
+        }
+
+        .editor::-webkit-scrollbar-thumb, .editor-highlight::-webkit-scrollbar-thumb {
+            background: #666;
+            border-radius: 6px;
+        }
+
+        .editor-highlight code {
+            background: none !important;
+        }
+
+        .editor:focus {
+            outline: none;
         }
 
         .preview-section {
@@ -123,15 +201,24 @@
         <div class="code-section">
             <div>
                 <h2>HTML</h2>
-                <textarea id="htmlEditor" class="editor" placeholder="HTML 코드를 입력하세요"></textarea>
+                <div class="editor-container">
+                    <textarea id="htmlEditor" class="editor" placeholder="HTML 코드를 입력하세요"></textarea>
+                    <div class="editor-highlight"><code class="language-html" id="htmlHighlight"></code></div>
+                </div>
             </div>
             <div>
                 <h2>CSS</h2>
-                <textarea id="cssEditor" class="editor" placeholder="CSS 코드를 입력하세요"></textarea>
+                <div class="editor-container">
+                    <textarea id="cssEditor" class="editor" placeholder="CSS 코드를 입력하세요"></textarea>
+                    <div class="editor-highlight"><code class="language-css" id="cssHighlight"></code></div>
+                </div>
             </div>
             <div>
                 <h2>JavaScript</h2>
-                <textarea id="jsEditor" class="editor" placeholder="JavaScript 코드를 입력하세요"></textarea>
+                <div class="editor-container">
+                    <textarea id="jsEditor" class="editor" placeholder="JavaScript 코드를 입력하세요"></textarea>
+                    <div class="editor-highlight"><code class="language-javascript" id="jsHighlight"></code></div>
+                </div>
             </div>
         </div>
         <div class="preview-section">
@@ -142,11 +229,19 @@
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-markup.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-javascript.min.js"></script>
     <script>
         const htmlEditor = document.getElementById('htmlEditor');
         const cssEditor = document.getElementById('cssEditor');
         const jsEditor = document.getElementById('jsEditor');
         const preview = document.getElementById('preview');
+        
+        const htmlHighlight = document.getElementById('htmlHighlight');
+        const cssHighlight = document.getElementById('cssHighlight');
+        const jsHighlight = document.getElementById('jsHighlight');
 
         function updatePreview() {
             const html = htmlEditor.value;
@@ -172,13 +267,76 @@
             previewDocument.close();
         }
 
+        // 구문 강조 업데이트 함수
+        function updateHighlight(editor, highlightElement, language) {
+            const code = editor.value || ' '; // 빈 줄을 위해 최소 하나의 공백 필요
+            highlightElement.textContent = code;
+            Prism.highlightElement(highlightElement);
+            highlightElement.innerHTML = highlightElement.innerHTML.replace(/\n/g, '<br>\n');
+        }
+
         // 실시간 업데이트를 위한 이벤트 리스너
-        htmlEditor.addEventListener('input', updatePreview);
-        cssEditor.addEventListener('input', updatePreview);
-        jsEditor.addEventListener('input', updatePreview);
+        htmlEditor.addEventListener('input', () => {
+            updatePreview();
+            updateHighlight(htmlEditor, htmlHighlight, 'html');
+        });
+
+        cssEditor.addEventListener('input', () => {
+            updatePreview();
+            updateHighlight(cssEditor, cssHighlight, 'css');
+        });
+
+        jsEditor.addEventListener('input', () => {
+            updatePreview();
+            updateHighlight(jsEditor, jsHighlight, 'javascript');
+        });
 
         // 초기 미리보기 업데이트
         updatePreview();
+
+        // 탭 키와 붙여넣기 처리
+        [htmlEditor, cssEditor, jsEditor].forEach(editor => {
+            // 탭 키 처리
+            editor.addEventListener('keydown', function(e) {
+                if (e.key === 'Tab') {
+                    e.preventDefault();
+                    const start = this.selectionStart;
+                    const end = this.selectionEnd;
+                    this.value = this.value.substring(0, start) + '  ' + this.value.substring(end);
+                    this.selectionStart = this.selectionEnd = start + 2;
+                }
+            });
+            
+            // 붙여넣기 처리
+            editor.addEventListener('paste', function(e) {
+                e.preventDefault();
+                const text = (e.originalEvent || e).clipboardData.getData('text/plain');
+                const start = this.selectionStart;
+                const end = this.selectionEnd;
+                
+                // 줄바꿈 문자를 통일하고 탭을 공백으로 변환
+                let formattedText = text
+                    .replace(/\r\n/g, '\n')  // Windows 형식의 줄바꿈을 Unix 형식으로 변환
+                    .replace(/\r/g, '\n')    // 예전 Mac 형식의 줄바꿈을 Unix 형식으로 변환
+                    .replace(/\t/g, '  ');   // 탭을 공백 2개로 변환
+                
+                this.value = this.value.substring(0, start) + formattedText + this.value.substring(end);
+                this.selectionStart = this.selectionEnd = start + formattedText.length;
+                
+                // 변경사항 즉시 반영
+                setTimeout(() => {
+                    const event = new Event('input');
+                    this.dispatchEvent(event);
+                }, 0);
+            });
+
+            // 스크롤 동기화
+            editor.addEventListener('scroll', function() {
+                const highlight = this.nextElementSibling;
+                highlight.scrollTop = this.scrollTop;
+                highlight.scrollLeft = this.scrollLeft;
+            });
+        });
     </script>
     <footer>
         <p>콩냥의 웹 프로그래밍 연습장 | Kongzzi Made with ❤️ | <a href="https://github.com" target="_blank">GitHub</a> | <a href="#" onclick="clearAll()">초기화</a></p>
