@@ -349,6 +349,10 @@
                 cssEditor.value = '';
                 jsEditor.value = '';
                 updatePreview();
+                // 초기화 후 구문 강조 업데이트
+                updateHighlight(htmlEditor, htmlHighlight, 'html');
+                updateHighlight(cssEditor, cssHighlight, 'css');
+                updateHighlight(jsEditor, jsHighlight, 'javascript');
             }
         }
     </script>
